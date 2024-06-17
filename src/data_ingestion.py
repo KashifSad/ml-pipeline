@@ -3,7 +3,25 @@ import pandas as pd
 import os
 from sklearn.model_selection import train_test_split
 import yaml
+import logging
 
+
+logger = logging.getLogger('data_ingestion')
+logger.setLevel("DEBUG")
+
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel('DEBUG')
+
+file_handler = logging.FileHandler("error.log")
+file_handler.setLevel('ERROR')
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
 
 def load_params(params_path: str) -> float:
     try:
@@ -11,9 +29,10 @@ def load_params(params_path: str) -> float:
         with open(params_path, 'r') as file:
             params = yaml.safe_load(file)
         test_size = params['data_ingestion']['test_size']
+        logger.debug('test size retrieved')
         return test_size
     except FileNotFoundError:
-        print(f"Error: The file {params_path} was not found.")
+        logger.error('file not found')
         raise
     except KeyError as e:
         print(f"Error: Missing key in the params file: {e}")
